@@ -18,6 +18,43 @@
                     });
             }, 1000);
         }
+        if (data.gameInfo?.state === 'ready') {
+            const iframe = document.getElementById('wikiframe') as HTMLIFrameElement;
+            if (iframe && iframe.contentWindow) {
+                console.log(iframe.contentWindow);
+                // TODO: make this less wildly insecure (especially server side)
+                iframe.src = data.gameInfo.startpoint;
+            }
+            const poll = setInterval(() => {
+                console.log(iframe.src);
+                console.log(iframe.contentWindow?.location.href);
+                if (data.gameInfo?.player === 1 && data.gameInfo?.target == data.gameInfo?.p1loc) {
+                    window.location.reload();
+                }
+                if (data.gameInfo?.player === 2 && data.gameInfo?.target == data.gameInfo?.p2loc) {
+                    window.location.reload();
+                }
+                // we're gonna post the iframe's current url to the server
+                if (iframe && iframe.contentWindow) {
+                    fetch(`/i/${data.gameInfo?.gameid}/`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ action: "updatePos", gameUrl: iframe.contentWindow.location.href })
+                    }).then(res => {
+                        if (res.status === 200) {
+                            res.json().then(res => {
+                                if (res.state === 'finished') {
+                                    clearInterval(poll);
+                                    window.location.reload();
+                                }
+                            });
+                        }
+                    });
+                }
+            }, 1000);
+        }
     }
     function pickrand() {
         fetch('https://en.wikipedia.org/w/api.php?action=query&generator=random&grnlimit=1&grnnamespace=0&inprop=url&prop=info&format=json&origin=*')
@@ -76,7 +113,13 @@
             </div>
         {:else if data.gameInfo.state === 'ready'}
             <div class="flex flex-col justify-center items-center">
-                <h1>starting game...</h1>
+                <iframe src="https://en.wikipedia.org" sandbox="allow-same-origin" class="absolute h-screen w-screen min-h-screen" frameborder="0" title="game" id="wikiframe"></iframe>
+            </div>
+        {:else if data.gameInfo.state === 'finished'}
+            <div class="flex flex-col justify-center items-center">
+                <h1 class="text-4xl border border-white p-2 rounded-xl">game over</h1>
+                <p>thanks for playing! 🏴‍☠️🏴‍☠️🏴‍☠️</p>
+                <a href="/" class="mt-4 text-xl hover:underline">go back</a>
             </div>
         {:else}
             <div class="flex flex-col justify-center items-center">

@@ -34,6 +34,7 @@ export const load = ({ params, cookies }) => {
             console.log(secdb[gameid]);
             let newtok = uuidv4();
             secdb[gameid].p2tok = newtok;
+            game.player = 2;
             return {
                 gameInfo: game,
                 tok: newtok
@@ -42,6 +43,14 @@ export const load = ({ params, cookies }) => {
         else {
             // we have a valid tok
             console.log("valid tok");
+            let player = 0;
+            if (secdb[gameid].p1tok === provided_tok) {
+                player = 1;
+            }
+            if (secdb[gameid].p2tok === provided_tok) {
+                player = 2;
+            }
+            game.player = player;
             return {
                 gameInfo: game,
                 tok: provided_tok

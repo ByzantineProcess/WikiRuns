@@ -2,8 +2,23 @@ import { db, secdb } from '../../../db';
 import { json } from '@sveltejs/kit';
 import type { RequestEvent } from '@sveltejs/kit';
 
-export function GET({ params }: RequestEvent) {
+export function GET({ params, cookies }: RequestEvent) {
     const slug = params.slug;
+    if (!slug) {
+        return json({ error: 'Id not provided' }, { status: 400 });
+    }
+    let player = 0;
+    const provided_tok = cookies.get('tok');
+    // check for a token, it's not necessary for this route though
+    if (provided_tok) {
+        // check who owns this token
+        if (secdb[slug].p1tok === provided_tok) {
+            player = 1;
+        }
+        if (secdb[slug].p2tok === provided_tok) {
+            player = 2;
+        }
+    }
 
     if (!slug) {
         return json({ error: 'Id not provided' }, { status: 400 });
@@ -15,12 +30,23 @@ export function GET({ params }: RequestEvent) {
         return json({ error: 'Info not found' }, { status: 404 });
     }
 
+    if (player > 0) {
+        info.player = player;
+    }
+    
+    
     return json(info);
 }
 
 function checkFull(gameid: string) {
     if (db[gameid].startpoint !== '' && db[gameid].target !== '') {
         db[gameid].state = 'ready';
+    }
+}
+
+function checkFinished(gameid: string) {
+    if (db[gameid].p1loc === db[gameid].target || db[gameid].p2loc === db[gameid].target) {
+        db[gameid].state = 'finished';
     }
 }
 
@@ -58,6 +84,8 @@ export async function POST({ request, cookies, params }: RequestEvent) {
         if (game.state !== 'connected' && game.state !== 'partialReady') {
             return json({ error: 'Game not connected' }, { status: 400 });
         }
+        // 
+        // if (bodyParsed.gameUrl.)
         if (game.startpoint === '' && game.target === '') {
             // first selection
             const rand = Math.floor(Math.random() * 2);
@@ -81,6 +109,28 @@ export async function POST({ request, cookies, params }: RequestEvent) {
             checkFull(slug);
             // 200 no content
             return json({}, { status: 200 });
+        }
+    }
+    if (bodyParsed.action === 'updatePos') {
+        // first, figure out which player is updating through the token
+        const game = db[slug];
+        if (!game) {
+            return json({ error: 'Game not found' }, { status: 404 });
+        }
+        if (game.state !== 'ready') {
+            return json({ error: 'Game not ready' }, { status: 400 });
+        }
+        if (secdb[slug].p1tok === provided_tok) {
+            // player 1 is updating
+            db[slug].p1loc = bodyParsed.gameUrl;
+            checkFinished(slug);
+            return json(db[slug], { status: 200 });
+        }
+        if (secdb[slug].p2tok === provided_tok) {
+            // player 2 is updating
+            db[slug].p2loc = bodyParsed.gameUrl;
+            checkFinished(slug);
+            return json(db[slug], { status: 200 });
         }
     }
     return json({ error: 'Invalid action' }, { status: 400 });
