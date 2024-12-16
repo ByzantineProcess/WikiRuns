@@ -1,5 +1,6 @@
 <script lang="ts">
     import { browser } from '$app/environment';
+    
     export let data;
 
     if (browser) {
@@ -20,11 +21,6 @@
         }
         if (data.gameInfo?.state === 'ready') {
             const iframe = document.getElementById('wikiframe') as HTMLIFrameElement;
-            if (iframe && iframe.contentWindow) {
-                console.log(iframe.contentWindow);
-                // TODO: make this less wildly insecure (especially server side)
-                iframe.src = data.gameInfo.startpoint;
-            }
             const poll = setInterval(() => {
                 console.log(iframe.src);
                 console.log(iframe.contentWindow?.location.href);
