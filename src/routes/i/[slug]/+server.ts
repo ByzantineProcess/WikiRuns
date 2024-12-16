@@ -84,8 +84,10 @@ export async function POST({ request, cookies, params }: RequestEvent) {
         if (game.state !== 'connected' && game.state !== 'partialReady') {
             return json({ error: 'Game not connected' }, { status: 400 });
         }
-        // 
-        // if (bodyParsed.gameUrl.)
+        // check if the provided url is actually an english wikipedia article
+        if (!bodyParsed.gameUrl.startsWith('https://en.wikipedia.org/wiki/')) {
+            return json({ error: 'Invalid URL' }, { status: 400 });
+        }
         if (game.startpoint === '' && game.target === '') {
             // first selection
             const rand = Math.floor(Math.random() * 2);

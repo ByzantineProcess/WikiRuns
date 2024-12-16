@@ -2,7 +2,7 @@
     import { browser } from '$app/environment';
     
     export let data;
-
+    const gameTargetHuman = data.gameInfo?.target?.replace(/_/g, ' ').replace(/%27/g, "'").replace('https://en.wikipedia.org/wiki/', '');
     if (browser) {
         console.log(data);
         document.cookie = `tok=${data.tok}; path=/`;
@@ -106,6 +106,7 @@
                 <iframe src="https://en.wikipedia.org" sandbox="allow-same-origin" class="absolute h-screen w-screen min-h-screen" frameborder="0" title="game" id="wikiframe"></iframe>
             </div>
             <div class="absolute bottom-0 mb-2 left-1/2 transform -translate-x-1/2 items-center text-center bg-black bg-opacity-50 rounded-xl hover:bg-opacity-100">
+                <p class="p-4 rounded-xl">you need to get to {gameTargetHuman}</p>
                 <button on:click={sayImDone} class="p-4 rounded-xl hover:underline hover:shadow-2xl">i got it!</button>
             </div>
         {:else if data.gameInfo.state === 'finished'}
