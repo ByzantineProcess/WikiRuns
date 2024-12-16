@@ -111,7 +111,7 @@ export async function POST({ request, cookies, params }: RequestEvent) {
             return json({}, { status: 200 });
         }
     }
-    if (bodyParsed.action === 'updatePos') {
+    if (bodyParsed.action === 'done') {
         // first, figure out which player is updating through the token
         const game = db[slug];
         if (!game) {
@@ -122,14 +122,14 @@ export async function POST({ request, cookies, params }: RequestEvent) {
         }
         if (secdb[slug].p1tok === provided_tok) {
             // player 1 is updating
-            db[slug].p1loc = bodyParsed.gameUrl;
-            checkFinished(slug);
+            db[slug].p1loc = db[slug].target;
+            db[slug].state = 'finished';
             return json(db[slug], { status: 200 });
         }
         if (secdb[slug].p2tok === provided_tok) {
             // player 2 is updating
-            db[slug].p2loc = bodyParsed.gameUrl;
-            checkFinished(slug);
+            db[slug].p2loc = db[slug].target;
+            db[slug].state = 'finished';
             return json(db[slug], { status: 200 });
         }
     }

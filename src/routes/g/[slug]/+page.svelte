@@ -20,35 +20,15 @@
             }, 1000);
         }
         if (data.gameInfo?.state === 'ready') {
-            const iframe = document.getElementById('wikiframe') as HTMLIFrameElement;
             const poll = setInterval(() => {
-                console.log(iframe.src);
-                console.log(iframe.contentWindow?.location.href);
-                if (data.gameInfo?.player === 1 && data.gameInfo?.target == data.gameInfo?.p1loc) {
-                    window.location.reload();
-                }
-                if (data.gameInfo?.player === 2 && data.gameInfo?.target == data.gameInfo?.p2loc) {
-                    window.location.reload();
-                }
-                // we're gonna post the iframe's current url to the server
-                if (iframe && iframe.contentWindow) {
-                    fetch(`/i/${data.gameInfo?.gameid}/`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ action: "updatePos", gameUrl: iframe.contentWindow.location.href })
-                    }).then(res => {
-                        if (res.status === 200) {
-                            res.json().then(res => {
-                                if (res.state === 'finished') {
-                                    clearInterval(poll);
-                                    window.location.reload();
-                                }
-                            });
+                fetch(`/i/${data.gameInfo?.gameid}`)
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.state === 'finished') {
+                            clearInterval(poll);
+                            window.location.reload();
                         }
                     });
-                }
             }, 1000);
         }
     }
@@ -75,6 +55,19 @@
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify({ action: "select", gameUrl: url })
+        }).then(res => {
+            if (res.status === 200) {
+                window.location.reload();
+            }
+        });
+    }
+    function sayImDone() {
+        fetch(`/i/${data.gameInfo?.gameid}/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ action: "done" })
         }).then(res => {
             if (res.status === 200) {
                 window.location.reload();
@@ -110,6 +103,9 @@
         {:else if data.gameInfo.state === 'ready'}
             <div class="flex flex-col justify-center items-center">
                 <iframe src="https://en.wikipedia.org" sandbox="allow-same-origin" class="absolute h-screen w-screen min-h-screen" frameborder="0" title="game" id="wikiframe"></iframe>
+            </div>
+            <div class="absolute bottom-0 mb-2 left-1/2 transform -translate-x-1/2 items-center text-center bg-black bg-opacity-50 rounded-xl hover:bg-opacity-100">
+                <button on:click={sayImDone} class="p-4 rounded-xl hover:underline hover:shadow-2xl">i got it!</button>
             </div>
         {:else if data.gameInfo.state === 'finished'}
             <div class="flex flex-col justify-center items-center">
