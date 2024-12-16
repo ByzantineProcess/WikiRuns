@@ -1,38 +1,17 @@
-# sv
+# WikiRuns
+> a. k. a. "yet another wikipedia speedrunning app"
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+a pretty good web app for speedrunning wikipedia
 
-## Creating a project
+made with SvelteKit and Tailwind.
 
-If you're seeing this, you've probably already done this step. Congrats!
+## long description
 
-```bash
-# create a new project in the current directory
-npx sv create
+I wanted to make a different wiki speedrun site focused on ease of connectivity and overall speed. Other options <sub><sup>apart from being blocked at my school</sup></sub> didn't feel modern, or required signups just to play. This is not the experience I wanted, so I set out to build a different one.
 
-# create a new project in my-app
-npx sv create my-app
-```
+The multiplayer system is designed to be quick and snappy, with join links and 4-digit join codes available for any kind of connection.
+No database is used, an in-memory JS object on the server side is good enough for what we do here. 
 
-## Developing
+This app works in just 3 routes: the homepage, the game page, and an info API.
+When a player visits the homepage, a new game ID is generated. For simplicity, game IDs and join codes are one and the same.
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
-
-## Building
-
-To create a production version of your app:
-
-```bash
-npm run build
-```
-
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.

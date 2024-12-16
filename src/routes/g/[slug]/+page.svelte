@@ -20,6 +20,7 @@
             }, 1000);
         }
         if (data.gameInfo?.state === 'ready') {
+            document.getElementById('wikiframe')?.setAttribute('src', data.gameInfo?.startpoint);
             const poll = setInterval(() => {
                 fetch(`/i/${data.gameInfo?.gameid}`)
                     .then(res => res.json())
